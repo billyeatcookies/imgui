@@ -60,7 +60,7 @@ struct ImGui_ImplDX11_Data
     int                         VertexBufferSize;
     int                         IndexBufferSize;
 
-    ImGui_ImplDX11_Data()       { memset(this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
+    ImGui_ImplDX11_Data()       { memset((void*)this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
 };
 
 struct VERTEX_CONSTANT_BUFFER
@@ -266,7 +266,7 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
                 // Project scissor/clipping rectangles into framebuffer space
                 ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x, pcmd->ClipRect.y - clip_off.y);
                 ImVec2 clip_max(pcmd->ClipRect.z - clip_off.x, pcmd->ClipRect.w - clip_off.y);
-                if (clip_max.x < clip_min.x || clip_max.y < clip_min.y)
+                if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
 
                 // Apply scissor/clipping rectangle
@@ -349,6 +349,7 @@ static void ImGui_ImplDX11_CreateFontsTexture()
     io.Fonts->SetTexID((ImTextureID)bd->pFontTextureView);
 
     // Create texture sampler
+    // (Bilinear sampling is required by default. Set 'io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = false' to allow point/nearest sampling)
     {
         D3D11_SAMPLER_DESC desc;
         ZeroMemory(&desc, sizeof(desc));
